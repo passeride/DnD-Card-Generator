@@ -1,26 +1,33 @@
-import PyPDF2
-from collections import defaultdict
-import os
+from __future__ import annotations
+
 import argparse
+import os
+import shutil
 import subprocess
 import sys
-import shutil
+from collections import defaultdict
+
+import PyPDF2
 
 # Define size names
 SIZE_NAMES = {
     "357x252": "Small",
-    "714x252": "Large",      
-    "714x357": "Epic",       
-    "714x536": "Super_Epic"
+    "714x252": "Large",
+    "714x357": "Epic",
+    "714x536": "Super_Epic",
 }
 
-def get_size_name(width, height):
-    """Get friendly name for a given size"""
+
+def get_size_name(width: float, height: float) -> str:
+    """Return friendly name for a given size."""
     size_key = f"{round(width)}x{round(height)}"
     return SIZE_NAMES.get(size_key, f"size_{size_key}")
 
-def split_pdf_by_size(input_file):
-    """Split a PDF into multiple files based on page dimensions"""
+
+def split_pdf_by_size(
+    input_file: str,
+) -> tuple[list[str], dict[str, list[int]]]:
+    """Split a PDF into multiple files based on page dimensions."""
 
     # Open the PDF
     reader = PyPDF2.PdfReader(input_file)
@@ -37,11 +44,11 @@ def split_pdf_by_size(input_file):
 
     # Create output files for each size group
     base_name = os.path.splitext(input_file)[0]
-    output_files = []
+    output_files: list[str] = []
 
     for size, page_indices in size_groups.items():
         # Get friendly name
-        friendly_name = get_size_name(*map(int, size.split('x')))
+        friendly_name = get_size_name(*map(int, size.split("x")))
 
         # Create a new PDF writer for this size group
         writer = PyPDF2.PdfWriter()
@@ -54,22 +61,27 @@ def split_pdf_by_size(input_file):
         output_filename = f"{base_name}_{friendly_name}.pdf"
 
         # Write the PDF
-        with open(output_filename, 'wb') as output_file:
+        with open(output_filename, "wb") as output_file:
             writer.write(output_file)
 
         output_files.append(output_filename)
 
         # Print summary
-        page_numbers = [str(i+1) for i in page_indices]  # Convert to 1-indexed
+        page_numbers = [
+            str(i + 1) for i in page_indices
+        ]  # Convert to 1-indexed
         print(f"\n{friendly_name} cards ({size}):")
-        print(f"  - Pages: {', '.join(page_numbers[:10])}{'...' if len(page_numbers) > 10 else ''}")
+        print(
+            f"  - Pages: {', '.join(page_numbers[:10])}{'...' if len(page_numbers) > 10 else ''}"
+        )
         print(f"  - Total: {len(page_indices)} pages")
         print(f"  - Saved to: {output_filename}")
 
     return output_files, size_groups
 
-def run_pdfjam_command(cmd):
-    """Execute a pdfjam command"""
+
+def run_pdfjam_command(cmd: list[str]) -> bool:
+    """Execute a pdfjam command."""
     try:
         print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -83,25 +95,37 @@ def run_pdfjam_command(cmd):
         return False
     return True
 
-def process_nup(size_groups, base_name, do_merge=True, margin=None):
-    """Generate and optionally run N-up commands"""
-    print("\n" + "="*50)
+
+def process_nup(
+    size_groups: dict[str, list[int]],
+    base_name: str,
+    do_merge: bool = True,
+    margin: str | None = None,
+) -> tuple[list[str], list[str]]:
+    """Generate and optionally run N-up commands."""
+    print("\n" + "=" * 50)
     print("N-up Processing:")
-    print("="*50)
+    print("=" * 50)
 
     # Optimal layouts for each card type
     nup_settings = {
-        "357x252": {"nup": "2x2", "landscape": True},   # Small: 4 per page, landscape
-        "714x252": {"nup": "1x2", "landscape": True},   # Large: 2 per page, landscape
-        "714x357": None,                                # Epic: Skip N-up
-        "714x536": None                                 # Super Epic: Skip N-up
+        "357x252": {
+            "nup": "2x2",
+            "landscape": True,
+        },  # Small: 4 per page, landscape
+        "714x252": {
+            "nup": "1x2",
+            "landscape": True,
+        },  # Large: 2 per page, landscape
+        "714x357": None,  # Epic: Skip N-up
+        "714x536": None,  # Super Epic: Skip N-up
     }
 
-    nup_files = []
-    skipped = []
+    nup_files: list[str] = []
+    skipped: list[str] = []
 
     for size, pages in size_groups.items():
-        friendly_name = get_size_name(*map(int, size.split('x')))
+        friendly_name = get_size_name(*map(int, size.split("x")))
         settings = nup_settings.get(size)
 
         # Skip N-up for Epic and Super Epic
@@ -120,15 +144,20 @@ def process_nup(size_groups, base_name, do_merge=True, margin=None):
 
         orientation = "landscape" if use_landscape else "portrait"
         print(f"\n# {friendly_name} cards ({size}) - {len(pages)} pages:")
-        print(f"# Layout: {nup} = {eval(nup.replace('x', '*'))} cards per sheet ({orientation})")
+        print(
+            f"# Layout: {nup} = {eval(nup.replace('x', '*'))} cards per sheet ({orientation})"
+        )
         if margin:
             print(f"# Margin: {margin}")
 
         cmd = [
             "pdfjam",
-            "--nup", nup,
-            "--noautoscale", "true",  # Keep original size
-            "--paper", "a4paper"
+            "--nup",
+            nup,
+            "--noautoscale",
+            "true",  # Keep original size
+            "--paper",
+            "a4paper",
         ]
 
         # Add margin if specified
@@ -139,10 +168,7 @@ def process_nup(size_groups, base_name, do_merge=True, margin=None):
         if use_landscape:
             cmd.append("--landscape")
 
-        cmd.extend([
-            "--outfile", output,
-            filename
-        ])
+        cmd.extend(["--outfile", output, filename])
 
         if do_merge:
             if not run_pdfjam_command(cmd):
@@ -160,13 +186,16 @@ def process_nup(size_groups, base_name, do_merge=True, margin=None):
             print(cmd_str)
 
     if skipped:
-        print(f"\nNote: {', '.join(skipped)} cards kept as single pages (no N-up processing)")
+        print(
+            f"\nNote: {', '.join(skipped)} cards kept as single pages (no N-up processing)"
+        )
 
     return nup_files
 
+
 def main():
     parser = argparse.ArgumentParser(
-        description='Split PDF by page sizes and create N-up layouts',
+        description="Split PDF by page sizes and create N-up layouts",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -184,14 +213,22 @@ Card types:
   Large (714x252): 1x2 layout in landscape (2 per page) -> *_Large_merged.pdf
   Epic (714x357): No N-up (kept as single pages)
   Super Epic (714x536): No N-up (kept as single pages)
-        """
+        """,
     )
 
-    parser.add_argument('input_pdf', help='Input PDF file path')
-    parser.add_argument('--no-merge', action='store_true',
-                        help='Only split and show commands without running N-up merge')
-    parser.add_argument('-m', '--margin', type=str, default=None,
-                        help='Margin/spacing between cards (e.g., "10mm 10mm")')
+    parser.add_argument("input_pdf", help="Input PDF file path")
+    parser.add_argument(
+        "--no-merge",
+        action="store_true",
+        help="Only split and show commands without running N-up merge",
+    )
+    parser.add_argument(
+        "-m",
+        "--margin",
+        type=str,
+        default=None,
+        help='Margin/spacing between cards (e.g., "10mm 10mm")',
+    )
 
     args = parser.parse_args()
 
@@ -212,7 +249,7 @@ Card types:
 
     # Check for required tools if merging
     if do_merge:
-        if shutil.which('pdfjam') is None:
+        if shutil.which("pdfjam") is None:
             print("Error: 'pdfjam' is not installed or not in PATH!")
             print("Please install pdfjam first.")
             print("Alternatively, use --no-merge to just split the PDF.")
@@ -224,14 +261,16 @@ Card types:
         output_files, size_groups = split_pdf_by_size(args.input_pdf)
 
         # Process N-up
-        nup_files = process_nup(size_groups, base_name, do_merge=do_merge, margin=args.margin)
+        nup_files = process_nup(
+            size_groups, base_name, do_merge=do_merge, margin=args.margin
+        )
 
         # Summary
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Card type summary:")
-        print("="*50)
+        print("=" * 50)
         for size, pages in size_groups.items():
-            friendly_name = get_size_name(*map(int, size.split('x')))
+            friendly_name = get_size_name(*map(int, size.split("x")))
             print(f"{friendly_name}: {len(pages)} cards")
 
         if do_merge and nup_files:
@@ -242,13 +281,17 @@ Card types:
             for nup_file in nup_files:
                 print(f"  - {nup_file}")
         elif not do_merge:
-            print("\n✓ Split complete! Use without --no-merge to create merged PDFs")
+            print(
+                "\n✓ Split complete! Use without --no-merge to create merged PDFs"
+            )
 
     except Exception as e:
         print(f"Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

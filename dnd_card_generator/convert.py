@@ -1,28 +1,31 @@
+from __future__ import annotations
+
 import argparse
-import tempfile
-import pathlib
-import zipfile
 import errno
 import os
+import pathlib
 import shutil
+import tempfile
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, asdict
+import zipfile
+from dataclasses import asdict, dataclass
 
 import yaml
 from bs4 import BeautifulSoup
 
-from CardGenerator import ExistingFile
+from .card_generator import ExistingFile
 
 
 def noop(self, *args, **kw):
+    """Disable tag processing when dumping YAML."""
     pass
 
 
 yaml.emitter.Emitter.process_tag = noop
 
 
-def strip_tags(html):
-    """Strip unwanted HTML tags"""
+def strip_tags(html: str) -> str:
+    """Strip unwanted HTML anchor tags from HTML strings."""
     soup = BeautifulSoup(html, "html.parser")
 
     for a in soup.find_all("a"):
@@ -36,6 +39,8 @@ ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 
 @dataclass
 class MonsterCardData:
+    """Data representation of a monster card."""
+
     title: str
     subtitle: str
     artist: str
@@ -60,6 +65,8 @@ class MonsterCardData:
 
 @dataclass
 class ItemCardData:
+    """Data representation of an item card."""
+
     title: str
     subtitle: str
     artist: str
@@ -128,11 +135,13 @@ cr_to_xp = {
 }
 
 
-def generate(args):
+def generate(args: argparse.Namespace) -> None:
+    """Debug entry point to display parsed arguments."""
     print(args)
 
 
-def convert(args):
+def convert(args: argparse.Namespace) -> None:
+    """Convert data files to YAML for the card generator."""
     if args.output_path is None:
         args.output_path = pathlib.Path(args.input.stem)
 
@@ -157,7 +166,8 @@ def convert(args):
                 yaml.dump(entries, f, sort_keys=False)
 
 
-def convert_encounterplus(args):
+def convert_encounterplus(args: argparse.Namespace) -> dict[str, list[dict]]:
+    """Convert an EncounterPlus module to card YAML files."""
     with tempfile.TemporaryDirectory() as tempdir:
         tempdir = pathlib.Path(tempdir)
 
@@ -199,7 +209,10 @@ def convert_encounterplus(args):
 
                 # Strip unused fields
                 item_dict = asdict(
-                    item, dict_factory=lambda x: {k: v for (k, v) in x if v is not None}
+                    item,
+                    dict_factory=lambda x: {
+                        k: v for (k, v) in x if v is not None
+                    },
                 )
                 entries.append(item_dict)
             results[tag] = entries
@@ -207,11 +220,12 @@ def convert_encounterplus(args):
         return results
 
 
-def process_item(item_xml):
+def process_item(item_xml: ET.Element) -> ItemCardData:
+    """Return :class:`ItemCardData` from an XML element."""
     item = {}
 
     # Construct subtitle
-    subtitle = f'{item_xml.findtext("rarity")}'
+    subtitle = f"{item_xml.findtext('rarity')}"
     attune = item_xml.findtext("attune")
     if attune is not None:
         subtitle += f" ({attune})"
@@ -241,8 +255,9 @@ def process_item(item_xml):
     return item_data
 
 
-def process_entry(monster, tag):
-    entries = {}
+def process_entry(monster: ET.Element, tag: str) -> dict[str, str]:
+    """Extract and clean entries for a particular tag."""
+    entries: dict[str, str] = {}
     for entry in monster.findall(tag):
         name = entry.findtext("name").strip()
         if name.endswith("."):
@@ -256,7 +271,8 @@ def process_entry(monster, tag):
     return entries
 
 
-def process_monster(monster_xml):
+def process_monster(monster_xml: ET.Element) -> MonsterCardData:
+    """Create :class:`MonsterCardData` from a monster XML element."""
     monster_name = monster_xml.findtext("name")
     attributes = {}
 
@@ -275,7 +291,9 @@ def process_monster(monster_xml):
     senses = monster_xml.findtext("senses")
     passive_perception = monster_xml.findtext("passive")
     if senses:
-        attributes["Senses"] = f"{senses}, Passive Perception {passive_perception}"
+        attributes["Senses"] = (
+            f"{senses}, Passive Perception {passive_perception}"
+        )
     else:
         attributes["Senses"] = f"Passive Perception {passive_perception}"
 
@@ -352,12 +370,12 @@ def process_monster(monster_xml):
         armor_class=monster_xml.findtext("ac").strip(),
         max_hit_points=monster_xml.findtext("hp"),
         speed=monster_xml.findtext("speed"),
-        strength=f"{monster_xml.findtext('str')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        dexterity=f"{monster_xml.findtext('dex')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        constitution=f"{monster_xml.findtext('con')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        intelligence=f"{monster_xml.findtext('int')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        wisdom=f"{monster_xml.findtext('wis')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        charisma=f"{monster_xml.findtext('cha')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
+        strength=f"{monster_xml.findtext('str')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        dexterity=f"{monster_xml.findtext('dex')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        constitution=f"{monster_xml.findtext('con')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        intelligence=f"{monster_xml.findtext('int')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        wisdom=f"{monster_xml.findtext('wis')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        charisma=f"{monster_xml.findtext('cha')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
         challenge_rating=monster_xml.findtext("cr"),
         experience_points=cr_to_xp[monster_xml.findtext("cr")]
         if monster_xml.findtext("cr")
@@ -373,7 +391,6 @@ def process_monster(monster_xml):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Convert data into YAML from other formats"
     )
