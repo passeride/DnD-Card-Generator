@@ -40,6 +40,7 @@ ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 @dataclass
 class MonsterCardData:
     """Data representation of a monster card."""
+
     title: str
     subtitle: str
     artist: str
@@ -65,6 +66,7 @@ class MonsterCardData:
 @dataclass
 class ItemCardData:
     """Data representation of an item card."""
+
     title: str
     subtitle: str
     artist: str
@@ -207,7 +209,10 @@ def convert_encounterplus(args: argparse.Namespace) -> dict[str, list[dict]]:
 
                 # Strip unused fields
                 item_dict = asdict(
-                    item, dict_factory=lambda x: {k: v for (k, v) in x if v is not None}
+                    item,
+                    dict_factory=lambda x: {
+                        k: v for (k, v) in x if v is not None
+                    },
                 )
                 entries.append(item_dict)
             results[tag] = entries
@@ -220,7 +225,7 @@ def process_item(item_xml: ET.Element) -> ItemCardData:
     item = {}
 
     # Construct subtitle
-    subtitle = f'{item_xml.findtext("rarity")}'
+    subtitle = f"{item_xml.findtext('rarity')}"
     attune = item_xml.findtext("attune")
     if attune is not None:
         subtitle += f" ({attune})"
@@ -286,7 +291,9 @@ def process_monster(monster_xml: ET.Element) -> MonsterCardData:
     senses = monster_xml.findtext("senses")
     passive_perception = monster_xml.findtext("passive")
     if senses:
-        attributes["Senses"] = f"{senses}, Passive Perception {passive_perception}"
+        attributes["Senses"] = (
+            f"{senses}, Passive Perception {passive_perception}"
+        )
     else:
         attributes["Senses"] = f"Passive Perception {passive_perception}"
 
@@ -363,12 +370,12 @@ def process_monster(monster_xml: ET.Element) -> MonsterCardData:
         armor_class=monster_xml.findtext("ac").strip(),
         max_hit_points=monster_xml.findtext("hp"),
         speed=monster_xml.findtext("speed"),
-        strength=f"{monster_xml.findtext('str')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        dexterity=f"{monster_xml.findtext('dex')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        constitution=f"{monster_xml.findtext('con')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        intelligence=f"{monster_xml.findtext('int')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        wisdom=f"{monster_xml.findtext('wis')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
-        charisma=f"{monster_xml.findtext('cha')} ({(int(monster_xml.findtext('str'))-10 )//2:+d})",
+        strength=f"{monster_xml.findtext('str')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        dexterity=f"{monster_xml.findtext('dex')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        constitution=f"{monster_xml.findtext('con')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        intelligence=f"{monster_xml.findtext('int')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        wisdom=f"{monster_xml.findtext('wis')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
+        charisma=f"{monster_xml.findtext('cha')} ({(int(monster_xml.findtext('str')) - 10) // 2:+d})",
         challenge_rating=monster_xml.findtext("cr"),
         experience_points=cr_to_xp[monster_xml.findtext("cr")]
         if monster_xml.findtext("cr")
@@ -384,7 +391,6 @@ def process_monster(monster_xml: ET.Element) -> MonsterCardData:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Convert data into YAML from other formats"
     )

@@ -122,7 +122,7 @@ Based on the Gale Force Nine Monster Cards. Currently only the standard small si
 - **image_path** - Path to the image to insert on the front of the card. This can either be a full path, or relative to the location of the YAML file.
 - **category** - The item category, white text shown at the bottom of the back of the card
 - **subcategory** - The item subcategory, smaller white text shown next to the category in parenthesis
-- **description** - A list containing either: 
+- **description** - A list containing either:
     - Strings
     - Single entry dictionaries with the value being optional
 - **color** - A color name (e.g. `red`), hex color code (e.g. `#0000dd`) or array of RGB colors (e.g. `[0.7, 0.7, 0]`).
@@ -133,7 +133,7 @@ Based on the Gale Force Nine Monster Cards. Currently only the standard small si
   subtitle: Rare (requires attunement, and a really really really really long backstory for your name)
   image_path: badge.png
   artist: Public Domain
-  description: 
+  description:
     - Wearing this amulet will add a minimum of 10d8 syllables to your name. This effect is permanent, even once the amulet is removed. The effect stacks every time this amulet is worn.
     - Proud: You become unreasonably proud of your name, and insist that anyone who addresses you uses your full name.
     - Verbal incapacitation: "As an action you can force any creature with an intelligence score of 1 or higher to spend time pronouncing your name. While they are doing this they are completely preoccupied and take on the Incapacitated condition. Each round the targeted creature can make an Intelligence saving throw (DC 18). On a successful save, the creature correctly pronounces your name, and the Incapacitated condition is removed."
@@ -144,8 +144,8 @@ Based on the Gale Force Nine Monster Cards. Currently only the standard small si
 
 # Fonts
 Included in this repository are some free fonts that resemble the font used on the
-official cards as close as possible (if you know of a better fit, please let me 
-know!). If however you want to use the exact fonts used on the official cards you 
+official cards as close as possible (if you know of a better fit, please let me
+know!). If however you want to use the exact fonts used on the official cards you
 will need to put the following fonts into the `fonts` folder in TTF format:
 - ModestoExpanded-Regular.ttf
 - ModestoText-Light.ttf
@@ -154,10 +154,10 @@ will need to put the following fonts into the `fonts` folder in TTF format:
 - ModestoText-BoldItalic.ttf
 
 # Converter
-Bundled with this repo is a converter script (`convert.py`) that can take 
-[EncounterPlus](https://encounter.plus/) `.module`/`.compendium` files and turn 
-them into a YAML file useable with this tool, including images. Most importantly 
-this means you can use [EncounterLog](https://github.com/rrgeorge/EncounterLog) to 
+Bundled with this repo is a converter script (`convert.py`) that can take
+[EncounterPlus](https://encounter.plus/) `.module`/`.compendium` files and turn
+them into a YAML file useable with this tool, including images. Most importantly
+this means you can use [EncounterLog](https://github.com/rrgeorge/EncounterLog) to
 get YAML files + images for any content you own on [D&D Beyond](http://dndbeyond.com).
 
 ```

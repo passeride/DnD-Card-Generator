@@ -42,7 +42,9 @@ def ExistingFile(p: str) -> pathlib.Path:
 
 
 # Returns the best orientation for the given image aspect ration
-def best_orientation(image_path: pathlib.Path, card_width: float, card_height: float) -> "Orientation":
+def best_orientation(
+    image_path: pathlib.Path, card_width: float, card_height: float
+) -> "Orientation":
     """Return the best orientation for ``image_path`` given the card size."""
     image = PIL.Image.open(image_path)
     image_width, image_height = image.size
@@ -53,7 +55,9 @@ def best_orientation(image_path: pathlib.Path, card_width: float, card_height: f
 
 # Returns the width and height an image should be to fit into the available
 # space, while maintaining aspect ratio
-def get_image_size(path: pathlib.Path, available_width: float, available_height: float) -> tuple[float, float]:
+def get_image_size(
+    path: pathlib.Path, available_width: float, available_height: float
+) -> tuple[float, float]:
     """Return resized image dimensions maintaining aspect ratio."""
     img = utils.ImageReader(path)
     image_width, image_height = img.getSize()
@@ -96,7 +100,8 @@ class Fonts(ABC):
                 fontSize=self.styles["subtitle"][1] * self.FONT_SCALE,
                 textColor=self.styles["subtitle"][2],
                 backColor="red",
-                leading=self.styles["subtitle"][1] * self.FONT_SCALE + 0.5 * mm,
+                leading=self.styles["subtitle"][1] * self.FONT_SCALE
+                + 0.5 * mm,
                 alignment=TA_CENTER,
                 borderPadding=(0, 6),
             )
@@ -133,7 +138,8 @@ class Fonts(ABC):
                 name="action_title",
                 fontName=self.styles["modifier_title"][0],
                 fontSize=self.styles["modifier_title"][1] * self.FONT_SCALE,
-                leading=self.styles["modifier_title"][1] * self.FONT_SCALE + 0.5 * mm,
+                leading=self.styles["modifier_title"][1] * self.FONT_SCALE
+                + 0.5 * mm,
                 spaceBefore=1 * mm,
             )
         )
@@ -142,12 +148,15 @@ class Fonts(ABC):
                 name="modifier_title",
                 fontName=self.styles["modifier_title"][0],
                 fontSize=self.styles["modifier_title"][1] * self.FONT_SCALE,
-                leading=self.styles["modifier_title"][1] * self.FONT_SCALE + 0.5 * mm,
+                leading=self.styles["modifier_title"][1] * self.FONT_SCALE
+                + 0.5 * mm,
                 alignment=TA_CENTER,
             )
         )
 
-    def set_font(self, canvas: canvas.Canvas, section: str, custom_scale: float = 1.0) -> float:
+    def set_font(
+        self, canvas: canvas.Canvas, section: str, custom_scale: float = 1.0
+    ) -> float:
         """Set font on ``canvas`` and return the original font size in points."""
         canvas.setFont(
             self.styles[section][0],
@@ -178,7 +187,9 @@ class FreeFonts(Fonts):
         pdfmetrics.registerFont(
             TTFont("Universal Serif", self.FONT_DIR / "Universal Serif.ttf")
         )
-        pdfmetrics.registerFont(TTFont("ScalySans", self.FONT_DIR / "ScalySans.ttf"))
+        pdfmetrics.registerFont(
+            TTFont("ScalySans", self.FONT_DIR / "ScalySans.ttf")
+        )
         pdfmetrics.registerFont(
             TTFont("ScalySansItalic", self.FONT_DIR / "ScalySans-Italic.ttf")
         )
@@ -186,7 +197,10 @@ class FreeFonts(Fonts):
             TTFont("ScalySansBold", self.FONT_DIR / "ScalySans-Bold.ttf")
         )
         pdfmetrics.registerFont(
-            TTFont("ScalySansBoldItalic", self.FONT_DIR / "ScalySans-BoldItalic.ttf")
+            TTFont(
+                "ScalySansBoldItalic",
+                self.FONT_DIR / "ScalySans-BoldItalic.ttf",
+            )
         )
 
         addMapping("ScalySans", 0, 0, "ScalySans")  # normal
@@ -212,7 +226,10 @@ class AccurateFonts(Fonts):
 
     def _register_fonts(self):
         pdfmetrics.registerFont(
-            TTFont("ModestoExpanded", self.FONT_DIR / "ModestoExpanded-Regular.ttf")
+            TTFont(
+                "ModestoExpanded",
+                self.FONT_DIR / "ModestoExpanded-Regular.ttf",
+            )
         )
         pdfmetrics.registerFont(
             TTFont("ModestoTextLight", self.FONT_DIR / "ModestoText-Light.ttf")
@@ -234,9 +251,13 @@ class AccurateFonts(Fonts):
         )
 
         addMapping("ModestoTextLight", 0, 0, "ModestoTextLight")  # normal
-        addMapping("ModestoTextLight", 0, 1, "ModestoTextLightItalic")  # italic
+        addMapping(
+            "ModestoTextLight", 0, 1, "ModestoTextLightItalic"
+        )  # italic
         addMapping("ModestoTextLight", 1, 0, "ModestoTextBold")  # bold
-        addMapping("ModestoTextLight", 1, 1, "ModestoTextBoldItalic")  # italic and bold
+        addMapping(
+            "ModestoTextLight", 1, 1, "ModestoTextBoldItalic"
+        )  # italic and bold
 
 
 # Draws a line across the frame, unless it is at the top of the frame, in which
@@ -274,7 +295,9 @@ class LineDivider(Flowable):
         if not self._at_top():
             canvas = self.canv
             canvas.setFillColor(self.fill_color)
-            canvas.rect(self.xoffset, 0, self.width, self.line_height, stroke=0, fill=1)
+            canvas.rect(
+                self.xoffset, 0, self.width, self.line_height, stroke=0, fill=1
+            )
 
 
 class KeepTogether(Flowable):
@@ -302,7 +325,9 @@ class KeepTogether(Flowable):
         y -= self.flowables[0].getSpaceBefore()
         for flowable in self.flowables[::-1]:
             y += flowable.getSpaceBefore()
-            width, height = flowable.wrap(self._available_width, self._available_height)
+            width, height = flowable.wrap(
+                self._available_width, self._available_height
+            )
             flowable.drawOn(canvas, x, y, _sW=_sW)
             y += height
             y += flowable.getSpaceAfter()
@@ -391,8 +416,12 @@ class CardLayout(ABC):
         front_frame = Frame(
             self.border_front[Border.LEFT],
             self.border_front[Border.BOTTOM],
-            width - self.border_front[Border.LEFT] - self.border_front[Border.RIGHT],
-            height - self.border_front[Border.TOP] - self.border_front[Border.BOTTOM],
+            width
+            - self.border_front[Border.LEFT]
+            - self.border_front[Border.RIGHT],
+            height
+            - self.border_front[Border.TOP]
+            - self.border_front[Border.BOTTOM],
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
@@ -425,12 +454,17 @@ class CardLayout(ABC):
             raise Exception("Failed to draw title in front frame")
 
         title_height = (
-            front_frame.y1 + front_frame.height - front_frame._y + self.TEXT_MARGIN
+            front_frame.y1
+            + front_frame.height
+            - front_frame._y
+            + self.TEXT_MARGIN
         )
         title_paragraph.drawOn = original_drawOn
         front_frame._reset()
 
-        available_height = front_frame.height - title_height - self.TEXT_MARGIN * 2
+        available_height = (
+            front_frame.height - title_height - self.TEXT_MARGIN * 2
+        )
 
         image_width, image_height = get_image_size(
             self.front_image_path,
@@ -445,7 +479,9 @@ class CardLayout(ABC):
         if space > 0:
             elements.append(Spacer(front_frame.width, space / 2))
 
-        elements.append(Image(self.front_image_path, image_width, image_height))
+        elements.append(
+            Image(self.front_image_path, image_width, image_height)
+        )
 
         # Add second spacer
         if space > 0:
@@ -463,7 +499,6 @@ class CardLayout(ABC):
             element = self.elements.pop(0)
 
             if type(element) == LineDivider:
-
                 # Don't place a Line Divider if there is nothing after it
                 if len(self.elements) == 0:
                     break
@@ -474,7 +509,9 @@ class CardLayout(ABC):
 
                 # Calculate how much heigh is required for the line and the next element
                 _, line_height = element.wrap(available_width, 0xFFFFFFFF)
-                _, next_height = self.elements[0].wrap(available_width, 0xFFFFFFFF)
+                _, next_height = self.elements[0].wrap(
+                    available_width, 0xFFFFFFFF
+                )
 
                 # Dont draw it if it will be the last thing on the frame
                 if available_height < line_height + next_height:
@@ -615,7 +652,12 @@ class CardLayout(ABC):
 
         if self.background_image_path is not None:
             canvas.drawImage(
-                self.background_image_path, x, 0, width=width, height=height, mask=None
+                self.background_image_path,
+                x,
+                0,
+                width=width,
+                height=height,
+                mask=None,
             )
 
         canvas.restoreState()
@@ -644,7 +686,9 @@ class SmallCard(CardLayout):
             # Y
             self.border_back[Border.BOTTOM],
             # Width
-            self.width - self.border_back[Border.LEFT] - self.border_back[Border.RIGHT],
+            self.width
+            - self.border_back[Border.LEFT]
+            - self.border_back[Border.RIGHT],
             # Height
             self.height
             - self.border_back[Border.TOP]
@@ -681,7 +725,9 @@ class LargeCard(CardLayout):
             # Y
             self.border_back[Border.BOTTOM],
             # Width
-            self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.width / 2
+            - self.border_back[Border.LEFT]
+            - self.STANDARD_BORDER / 2,
             # Height
             self.height
             - self.border_back[Border.TOP]
@@ -698,7 +744,9 @@ class LargeCard(CardLayout):
             # Y
             self.border_back[Border.BOTTOM],
             # Width
-            self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.width / 2
+            - self.border_back[Border.LEFT]
+            - self.STANDARD_BORDER / 2,
             # Height
             self.height
             - self.border_back[Border.BOTTOM]
@@ -807,12 +855,15 @@ class MonsterCardLayout(CardLayout):
         canvas.drawString(*self.source_location, self.source)
 
     def fill_frames(self, canvas):
-
         # Title font scaling
         custom_scale = (
-            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+            min(1.0, 20 / len(self.title))
+            if isinstance(self, SmallCard)
+            else 1.0
         )
-        original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        original_font_size = (
+            self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        )
         font_size = original_font_size * custom_scale
         spacer_height = (original_font_size - font_size + 0.5 * mm) / 2
         style = copy(self.fonts.paragraph_styles["title"])
@@ -874,7 +925,11 @@ class MonsterCardLayout(CardLayout):
         ]
         # if modifiers are (int), e.g. 13, then automatically reformat as "13 (+1)"
         modifiers = [
-            (m if isinstance(m, str) else "%d (%+d)" % (m, math.floor((m - 10) / 2)))
+            (
+                m
+                if isinstance(m, str)
+                else "%d (%+d)" % (m, math.floor((m - 10) / 2))
+            )
             for m in modifiers
         ]
         modifier_table_data = [
@@ -882,7 +937,10 @@ class MonsterCardLayout(CardLayout):
                 Paragraph(a, self.fonts.paragraph_styles["modifier_title"])
                 for a in abilities
             ],
-            [Paragraph(m, self.fonts.paragraph_styles["modifier"]) for m in modifiers],
+            [
+                Paragraph(m, self.fonts.paragraph_styles["modifier"])
+                for m in modifiers
+            ],
         ]
 
         t = Table(
@@ -908,7 +966,9 @@ class MonsterCardLayout(CardLayout):
         text = ""
         for heading, body in (self.attributes or {}).items():
             text += "<b>{}:</b> {}<br/>".format(heading, body)
-        self.elements.append(Paragraph(text, self.fonts.paragraph_styles["text"]))
+        self.elements.append(
+            Paragraph(text, self.fonts.paragraph_styles["text"])
+        )
 
         # Abilities
         for heading, body in (self.abilities or {}).items():
@@ -928,7 +988,9 @@ class MonsterCardLayout(CardLayout):
         )
 
         # Actions
-        title = Paragraph("ACTIONS", self.fonts.paragraph_styles["action_title"])
+        title = Paragraph(
+            "ACTIONS", self.fonts.paragraph_styles["action_title"]
+        )
         first_action = True
         for heading, body in (self.actions or {}).items():
             paragraph = Paragraph(
@@ -952,7 +1014,9 @@ class MonsterCardLayout(CardLayout):
                 )
             )
 
-            title = Paragraph("REACTIONS", self.fonts.paragraph_styles["action_title"])
+            title = Paragraph(
+                "REACTIONS", self.fonts.paragraph_styles["action_title"]
+            )
             first_reaction = True
             for heading, body in (self.reactions or {}).items():
                 paragraph = Paragraph(
@@ -976,7 +1040,8 @@ class MonsterCardLayout(CardLayout):
             )
 
             title = Paragraph(
-                "LEGENDARY ACTIONS", self.fonts.paragraph_styles["action_title"]
+                "LEGENDARY ACTIONS",
+                self.fonts.paragraph_styles["action_title"],
             )
             first_legendary = True
             for entry in self.legendary or []:
@@ -992,7 +1057,9 @@ class MonsterCardLayout(CardLayout):
                     )
                 else:
                     TypeError(
-                        'Legendary action cannot be type "{}"'.format(type(entry))
+                        'Legendary action cannot be type "{}"'.format(
+                            type(entry)
+                        )
                     )
 
                 if first_legendary:
@@ -1005,9 +1072,13 @@ class MonsterCardLayout(CardLayout):
     def _get_title_paragraph(self):
         # Title font scaling
         custom_scale = (
-            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+            min(1.0, 20 / len(self.title))
+            if isinstance(self, SmallCard)
+            else 1.0
         )
-        original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        original_font_size = (
+            self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        )
         font_size = original_font_size * custom_scale
         style = copy(self.fonts.paragraph_styles["title"])
         style.fontSize = font_size
@@ -1059,7 +1130,6 @@ class ItemCardLayout(CardLayout):
             )
 
     def fill_frames(self, canvas):
-
         # Title
         self.elements.append(self._get_title_paragraph())
 
@@ -1076,7 +1146,9 @@ class ItemCardLayout(CardLayout):
 
         if type(self.description) == str:
             self.elements.append(
-                Paragraph(self.description, self.fonts.paragraph_styles["text"])
+                Paragraph(
+                    self.description, self.fonts.paragraph_styles["text"]
+                )
             )
             return
         if type(self.description) != list:
@@ -1091,7 +1163,6 @@ class ItemCardLayout(CardLayout):
                 )
             if type(entry) == dict:
                 for title, description in entry.items():
-
                     text = f"<i><b>{title}.</b></i>"
                     if description is not None:
                         text += f" {description}"
@@ -1175,7 +1246,12 @@ class CardGenerator(ABC):
 
 
 class MonsterCard(CardGenerator):
-    sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic, MonsterCardSuperEpic]
+    sizes = [
+        MonsterCardSmall,
+        MonsterCardLarge,
+        MonsterCardEpic,
+        MonsterCardSuperEpic,
+    ]
 
 
 class ItemCard(CardGenerator):
@@ -1183,7 +1259,6 @@ class ItemCard(CardGenerator):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="Generate D&D cards.")
     parser.add_argument(
         "-t",

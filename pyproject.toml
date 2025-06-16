@@ -11,6 +11,12 @@ dependencies = [
   "setuptools",
   "python-dotenv",
   "setuptools_scm",
+  "pyyaml",
+  "pillow",
+  "reportlab",
+  "svglib",
+  "beautifulsoup4",
+  "PyPDF2",
   "pythonenvvarmanager",
 ]
 
