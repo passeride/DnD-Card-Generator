@@ -1,10 +1,13 @@
-import PyPDF2
-from collections import defaultdict
-import os
+from __future__ import annotations
+
 import argparse
+import os
+import shutil
 import subprocess
 import sys
-import shutil
+from collections import defaultdict
+
+import PyPDF2
 
 # Define size names
 SIZE_NAMES = {
@@ -14,13 +17,13 @@ SIZE_NAMES = {
     "714x536": "Super_Epic"
 }
 
-def get_size_name(width, height):
-    """Get friendly name for a given size"""
+def get_size_name(width: float, height: float) -> str:
+    """Return friendly name for a given size."""
     size_key = f"{round(width)}x{round(height)}"
     return SIZE_NAMES.get(size_key, f"size_{size_key}")
 
-def split_pdf_by_size(input_file):
-    """Split a PDF into multiple files based on page dimensions"""
+def split_pdf_by_size(input_file: str) -> tuple[list[str], dict[str, list[int]]]:
+    """Split a PDF into multiple files based on page dimensions."""
 
     # Open the PDF
     reader = PyPDF2.PdfReader(input_file)
@@ -37,7 +40,7 @@ def split_pdf_by_size(input_file):
 
     # Create output files for each size group
     base_name = os.path.splitext(input_file)[0]
-    output_files = []
+    output_files: list[str] = []
 
     for size, page_indices in size_groups.items():
         # Get friendly name
@@ -68,8 +71,8 @@ def split_pdf_by_size(input_file):
 
     return output_files, size_groups
 
-def run_pdfjam_command(cmd):
-    """Execute a pdfjam command"""
+def run_pdfjam_command(cmd: list[str]) -> bool:
+    """Execute a pdfjam command."""
     try:
         print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -83,8 +86,13 @@ def run_pdfjam_command(cmd):
         return False
     return True
 
-def process_nup(size_groups, base_name, do_merge=True, margin=None):
-    """Generate and optionally run N-up commands"""
+def process_nup(
+    size_groups: dict[str, list[int]],
+    base_name: str,
+    do_merge: bool = True,
+    margin: str | None = None,
+) -> tuple[list[str], list[str]]:
+    """Generate and optionally run N-up commands."""
     print("\n" + "="*50)
     print("N-up Processing:")
     print("="*50)
@@ -97,8 +105,8 @@ def process_nup(size_groups, base_name, do_merge=True, margin=None):
         "714x536": None                                 # Super Epic: Skip N-up
     }
 
-    nup_files = []
-    skipped = []
+    nup_files: list[str] = []
+    skipped: list[str] = []
 
     for size, pages in size_groups.items():
         friendly_name = get_size_name(*map(int, size.split('x')))

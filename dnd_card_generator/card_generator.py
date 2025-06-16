@@ -1,8 +1,10 @@
-import os
-import math
-import yaml
-import sys
+from __future__ import annotations
+
 import argparse
+import math
+import os
+import sys
+import yaml
 import pathlib
 import itertools
 
@@ -31,28 +33,28 @@ from svglib.svglib import svg2rlg
 ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 
 
-def ExistingFile(p):
-    """Argparse type for absolute paths that exist"""
+def ExistingFile(p: str) -> pathlib.Path:
+    """Return ``pathlib.Path`` if the path exists else raise ``ArgumentTypeError``."""
     p = pathlib.Path(p).absolute()
     if p.exists():
         return p
-    else:
-        raise argparse.ArgumentTypeError(f"`{p}` does not exist")
+    raise argparse.ArgumentTypeError(f"`{p}` does not exist")
 
 
 # Returns the best orientation for the given image aspect ration
-def best_orientation(image_path, card_width, card_height):
+def best_orientation(image_path: pathlib.Path, card_width: float, card_height: float) -> "Orientation":
+    """Return the best orientation for ``image_path`` given the card size."""
     image = PIL.Image.open(image_path)
     image_width, image_height = image.size
     if (image_width > image_height) == (card_width > card_height):
         return Orientation.NORMAL
-    else:
-        return Orientation.TURN90
+    return Orientation.TURN90
 
 
 # Returns the width and height an image should be to fit into the available
 # space, while maintaining aspect ratio
-def get_image_size(path, available_width, available_height):
+def get_image_size(path: pathlib.Path, available_width: float, available_height: float) -> tuple[float, float]:
+    """Return resized image dimensions maintaining aspect ratio."""
     img = utils.ImageReader(path)
     image_width, image_height = img.getSize()
 
@@ -66,7 +68,9 @@ def get_image_size(path, available_width, available_height):
 # TODO: Clean up the font object, it seems a bit crude
 # TODO: Also manage colours
 class Fonts(ABC):
-    styles = {}
+    """Base font configuration for PDF generation."""
+
+    styles: dict[str, tuple[str, float, str]] = {}
     # Scaling factor between the font size and its actual height in mm
     FONT_SCALE = None
     FONT_DIR = ASSET_DIR / "fonts"
@@ -143,7 +147,8 @@ class Fonts(ABC):
             )
         )
 
-    def set_font(self, canvas, section, custom_scale=1.0):
+    def set_font(self, canvas: canvas.Canvas, section: str, custom_scale: float = 1.0) -> float:
+        """Set font on ``canvas`` and return the original font size in points."""
         canvas.setFont(
             self.styles[section][0],
             self.styles[section][1] * self.FONT_SCALE * custom_scale,

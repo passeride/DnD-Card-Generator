@@ -1,0 +1,124 @@
+[project]
+name = "dnd_card_generator"
+requires-python = ">=3.13"
+dynamic = ["version"]
+description = "Generate Dungeons & Dragons cards from YAML"
+readme = "README.md"
+dependencies = [
+  "typing-extensions",
+  "requests",
+  "pathlib",
+  "setuptools",
+  "python-dotenv",
+  "setuptools_scm",
+  "pythonenvvarmanager",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pyright",
+  "pytest",
+  "ruff",
+  "pytest-cov",
+  "pydoctor",
+  "pudb",
+  "pytest-pudb"
+]
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+packages = ["dnd_card_generator"]
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.pydoctor]
+add-package = ["dnd_card_generator"]
+docformat = "google"
+html-output = "doc"
+intersphinx = [
+  "https://docs.python.org/3/objects.inv",
+  "https://googleapis.dev/python/protobuf/latest/objects.inv",
+  "https://opentelemetry-python.readthedocs.io/en/latest/objects.inv",
+  "https://docs.pydantic.dev/objects.inv"
+]
+project-name = "dnd_card_generator"
+project-version = "0.1.1"
+sidebar-expand-depth = 2
+
+[tool.pytest.ini_options]
+log_file = "test_output/pytest.xml"
+testpaths = "tests"
+pythonpath = "."
+markers = [
+  "integration: integration tests that should only be run in those steps. (Deselect with '-m \"not integration\"')",
+]
+
+[tool.python.analysis]
+diagnosticMode = "on"
+diagnosticSeverityOverrides = "none"
+autoImportCompletions = true
+useLibraryCodeForTypes = false
+
+[tool.pyright]
+include = ["dnd_card_generator"]
+reportMissingTypeStubs = false
+stubPath = "./typings"
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+combine-as-imports = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+select = [
+  "D", # pycodestyle
+  "F",
+  "E",
+  "I",
+  "INP",
+  "RSE102",
+  "SIM",
+  "TD",
+  "FIX",
+  "ERA001",
+  "RUF",
+  "UP",
+  "B",
+  "ANN",
+  "COM819",
+  "N",
+  "A",
+  "G001",
+  "UP031",
+  "BLE001",
+  "B904",
+  "B006",
+  "S101",
+  "PIE790",
+]
+
+# On top of the Google convention, disable `D417`, which requires
+# documentation for every function parameter.
+ignore = [
+  "E501",
+  "ANN003",
+  "ANN204",
+  "FIX002",
+]
+
+
+[tool.ruff]
+line-length = 79
+target-version = "py313"
+exclude=["scripts", "old_tests"]
+
+[tool.coverage.run]
+source = ["dnd_card_generator"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["N","INP","ANN","D", "ERA", "S101"]

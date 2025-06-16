@@ -11,7 +11,7 @@ At this time, only monster & item cards are supported
 
 # Setup
 Before being able to use this script you will need to do the following:
- 1. Install [Python 3](https://www.python.org/downloads/)
+ 1. Install [Python 3.13](https://www.python.org/downloads/)
  1. Download and extract this repository (or use `git clone`)
  1. Open a terminal and navigate to the location you downloaded this repository to
  1. Run the following command from a terminals
@@ -19,7 +19,7 @@ Before being able to use this script you will need to do the following:
 
 # Usage
 ```
-usage: CardGenerator.py [-h] [-t {monster,item}] [-o output_path] [-f {free,accurate}] [-b BLEED] [--no-bg | --bg BACKGROUND] input
+usage: python -m dnd_card_generator.card_generator [-h] [-t {monster,item}] [-o output_path] [-f {free,accurate}] [-b BLEED] [--no-bg | --bg BACKGROUND] input
 
 Generate D&D cards.
 
